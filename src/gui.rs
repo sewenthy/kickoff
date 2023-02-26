@@ -211,7 +211,7 @@ pub fn register_inputs(
         }) {
             if has_ptr {
                 let pointer = seat.get_pointer();
-                pointer.quick_assign(move |_, event, mut data| {
+                pointer.quick_assign(move |_, event: PEvent, mut data| {
                     let DData {
                         query,
                         action,
