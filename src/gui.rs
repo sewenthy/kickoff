@@ -211,7 +211,22 @@ pub fn register_inputs(
         }) {
             if has_ptr {
                 let pointer = seat.get_pointer();
-                pointer.quick_assign(move |_, event, ddata| process_pointer_event(event, ddata));
+                pointer.quick_assign(move |_, event, mut data| {
+                    let DData {
+                        query,
+                        action,
+                        clipboard,
+                        ..
+                    } = data.get::<DData>().unwrap();
+                    if let PEvent::Button { button, state, .. } = event {
+                        if button == 274 && state == ButtonState::Pressed {
+                            if let Ok(txt) = clipboard.load_primary() {
+                                query.push_str(&txt);
+                                *action = Some(Action::Search);
+                            }
+                        }
+                    }
+                });
             }
         }
     }
