@@ -213,7 +213,7 @@ pub fn register_inputs(
             if has_ptr {
                 let pointer = seat.get_pointer();
                 pointer.quick_assign(move |_, event: PEvent, mut data| {
-                    bar(event, data)
+                    bar____EXTRACT_THIS(event, data)
                 });
             }
         }
@@ -241,7 +241,7 @@ pub fn register_inputs(
     }
 }
 
-fn bar(event: Event, data: DispatchData<'a>) {
+fn bar____EXTRACT_THIS(event: Event, data: DispatchData<'a>) {
     let DData {
         query,
         action,
