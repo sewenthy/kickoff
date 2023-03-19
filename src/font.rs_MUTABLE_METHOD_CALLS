@@ -1,0 +1,1 @@
+glyph_cache.insert(conf, font.first().unwrap().rasterize_config(conf))
