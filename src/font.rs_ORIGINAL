@@ -1,5 +1,5 @@
 use crate::color::Color;
-use fontdue::layout::{CoordinateSystem, GlyphPosition, GlyphRasterConfig, Layout, LayoutSettings, TextStyle};
+use fontdue::layout::{CoordinateSystem, GlyphRasterConfig, Layout, LayoutSettings, TextStyle};
 use fontdue::Metrics;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -104,7 +104,11 @@ impl Font {
         }
 
         for glyph in layout.glyphs() {
-            Self::bar____EXTRACT_THIS(max_width, current_width, glyph);
+            if let Some(max_width) = max_width {
+                if current_width as usize + glyph.width > max_width {
+                    break;
+                }
+            }
             let (metrics, bitmap) = self.render_glyph(glyph.key);
             current_width += metrics.advance_width;
             for (i, alpha) in bitmap.iter().enumerate() {
@@ -126,13 +130,5 @@ impl Font {
         }
 
         (width as u32, layout.height() as u32)
-    }
-
-    fn bar____EXTRACT_THIS(max_width: Option<usize>, current_width: f32, glyph: &'a GlyphPosition) {
-        if let Some(max_width) = max_width {
-            if current_width as usize + glyph.width > max_width {
-                break;
-            }
-        }
     }
 }
