@@ -30,6 +30,7 @@ use std::io::{BufWriter, ErrorKind, Seek, Write};
 use std::rc::Rc;
 
 use image::{Pixel, Rgba, RgbaImage};
+use smithay_client_toolkit::reexports::client::protocol::wl_pointer::Event;
 
 use crate::keybinds::Keybindings;
 
@@ -212,20 +213,7 @@ pub fn register_inputs(
             if has_ptr {
                 let pointer = seat.get_pointer();
                 pointer.quick_assign(move |_, event: PEvent, mut data| {
-                    let DData {
-                        query,
-                        action,
-                        clipboard,
-                        ..
-                    } = data.get::<DData>().unwrap();
-                    if let PEvent::Button { button, state, .. } = event {
-                        if button == 274 && state == ButtonState::Pressed {
-                            if let Ok(txt) = clipboard.load_primary() {
-                                query.push_str(&txt);
-                                *action = Some(Action::Search);
-                            }
-                        }
-                    }
+                    bar(event, data)
                 });
             }
         }
@@ -248,6 +236,23 @@ pub fn register_inputs(
                 ) {
                     error!("Failed to map keyboard on seat {name} : {err:?}.")
                 }
+            }
+        }
+    }
+}
+
+fn bar(event: Event, mut data: DispatchData) {
+    let DData {
+        query,
+        action,
+        clipboard,
+        ..
+    } = data.get::<DData>().unwrap();
+    if let PEvent::Button { button, state, .. } = event {
+        if button == 274 && state == ButtonState::Pressed {
+            if let Ok(txt) = clipboard.load_primary() {
+                query.push_str(&txt);
+                *action = Some(Action::Search);
             }
         }
     }
