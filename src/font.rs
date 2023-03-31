@@ -65,14 +65,18 @@ impl Font {
         if let Some(bitmap) = glyph_cache.get(&conf) {
             bitmap.clone()
         } else {
-            let font: Vec<&fontdue::Font> = self
-                .fonts
-                .iter()
-                .filter(|f| (*f).file_hash() == conf.font_hash)
-                .collect();
-            glyph_cache.insert(conf, font.first().unwrap().rasterize_config(conf));
-            glyph_cache.get(&conf).unwrap().clone()
+            self.fun_name(conf, glyph_cache)
         }
+    }
+
+    fn fun_name(&self, conf: GlyphRasterConfig, mut glyph_cache: std::cell::RefMut<HashMap<GlyphRasterConfig, (Metrics, Vec<u8>)>>) -> (Metrics, Vec<u8>) {
+        let font: Vec<&fontdue::Font> = self
+            .fonts
+            .iter()
+            .filter(|f| (*f).file_hash() == conf.font_hash)
+            .collect();
+        glyph_cache.insert(conf, font.first().unwrap().rasterize_config(conf));
+        glyph_cache.get(&conf).unwrap().clone()
     }
 
     pub fn render(
