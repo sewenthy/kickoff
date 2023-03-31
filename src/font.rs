@@ -3,6 +3,7 @@ use fontdue::layout::{CoordinateSystem, GlyphRasterConfig, Layout, LayoutSetting
 use fontdue::Metrics;
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::ops::ControlFlow;
 use std::path::PathBuf;
 
 use tokio::{
@@ -104,10 +105,8 @@ impl Font {
         }
 
         for glyph in layout.glyphs() {
-            if let Some(max_width) = max_width {
-                if current_width as usize + glyph.width > max_width {
-                    break;
-                }
+            if let ControlFlow::Break(_) = fun_name(max_width, current_width, glyph) {
+                break;
             }
             let (metrics, bitmap) = self.render_glyph(glyph.key);
             current_width += metrics.advance_width;
@@ -131,4 +130,13 @@ impl Font {
 
         (width as u32, layout.height() as u32)
     }
+}
+
+fn fun_name(max_width: Option<usize>, current_width: f32, glyph: &fontdue::layout::GlyphPosition) -> ControlFlow<()> {
+    if let Some(max_width) = max_width {
+        if current_width as usize + glyph.width > max_width {
+            return ControlFlow::Break(());
+        }
+    }
+    ControlFlow::Continue(())
 }
