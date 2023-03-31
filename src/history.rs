@@ -48,20 +48,7 @@ impl History {
 
         if history_path.exists() {
             let last_modified = history_path.metadata()?.modified()?;
-            let interval_diff = if decrease_interval > 0 {
-                SystemTime::now()
-                    .duration_since(SystemTime::UNIX_EPOCH)
-                    .unwrap()
-                    .as_secs()
-                    / (3600 * decrease_interval)
-                    - last_modified
-                        .duration_since(SystemTime::UNIX_EPOCH)
-                        .unwrap()
-                        .as_secs()
-                        / (3600 * decrease_interval)
-            } else {
-                0
-            };
+            let interval_diff = Self::bar(decrease_interval, last_modified);
 
             let mut rdr = csv::Reader::from_path(history_path).unwrap();
             for result in rdr.deserialize() {
@@ -76,6 +63,24 @@ impl History {
         }
 
         Ok(res)
+    }
+
+    fn bar(decrease_interval: u64, last_modified: SystemTime) -> u64 {
+        let interval_diff = if decrease_interval > 0 {
+            SystemTime::now()
+                .duration_since(SystemTime::UNIX_EPOCH)
+                .unwrap()
+                .as_secs()
+                / (3600 * decrease_interval)
+                - last_modified
+                .duration_since(SystemTime::UNIX_EPOCH)
+                .unwrap()
+                .as_secs()
+                / (3600 * decrease_interval)
+        } else {
+            0
+        };
+        interval_diff
     }
 
     pub fn inc(&mut self, element: &Element) {
