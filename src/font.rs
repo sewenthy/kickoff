@@ -30,10 +30,7 @@ impl Font {
         } else {
             font_names
         };
-        let font_paths: Vec<PathBuf> = font_names
-            .iter()
-            .map(|name| fc.find(name, None).unwrap().path)
-            .collect();
+        let font_paths = Self::bar(fc, font_names);
         let mut font_data = Vec::new();
 
         for font_path in font_paths {
@@ -54,6 +51,14 @@ impl Font {
             scale: 1,
             glyph_cache: RefCell::new(HashMap::new()),
         })
+    }
+
+    fn bar(fc: Fontconfig, font_names: Vec<String>) -> Vec<PathBuf> {
+        let font_paths: Vec<PathBuf> = font_names
+            .iter()
+            .map(|name| fc.find(name, None).unwrap().path)
+            .collect();
+        font_paths
     }
 
     pub fn set_scale(&mut self, scale: i32) {
