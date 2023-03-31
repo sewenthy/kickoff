@@ -1,19 +1,15 @@
 use crate::color::Color;
+use fontconfig::Fontconfig;
 use fontdue::layout::{CoordinateSystem, GlyphRasterConfig, Layout, LayoutSettings, TextStyle};
 use fontdue::Metrics;
+use image::{Pixel, RgbaImage};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::path::PathBuf;
-
 use tokio::{
     fs::File,
     io::{self, AsyncReadExt},
 };
-
-use fontconfig::Fontconfig;
-
-use image::{Pixel, RgbaImage};
-
 pub struct Font {
     fonts: Vec<fontdue::Font>,
     layout: RefCell<Layout>,
@@ -21,7 +17,6 @@ pub struct Font {
     scale: i32,
     glyph_cache: RefCell<HashMap<GlyphRasterConfig, (Metrics, Vec<u8>)>>,
 }
-
 impl Font {
     pub async fn new(font_names: Vec<String>, size: f32) -> io::Result<Font> {
         let fc = Fontconfig::new().expect("Couldn't load fontconfig");
@@ -30,9 +25,8 @@ impl Font {
         } else {
             font_names
         };
-        let mut font_paths = Self::bar____EXTRACT_THIS(fc, font_names);
+        let mut font_paths = Self::bar(fc, font_names);
         let mut font_data = Vec::new();
-
         for font_path in font_paths {
             let mut font_buffer = Vec::new();
             File::open(font_path.to_str().unwrap())
@@ -43,7 +37,6 @@ impl Font {
                 fontdue::Font::from_bytes(font_buffer, fontdue::FontSettings::default()).unwrap(),
             );
         }
-
         Ok(Font {
             fonts: font_data,
             layout: RefCell::new(Layout::new(CoordinateSystem::PositiveYDown)),
@@ -52,19 +45,16 @@ impl Font {
             glyph_cache: RefCell::new(HashMap::new()),
         })
     }
-
-    fn bar____EXTRACT_THIS(fc: Fontconfig, font_names: Vec<String>) -> Vec<PathBuf> {
+    fn bar(fc: Fontconfig, font_names: Vec<String>) -> Vec<PathBuf> {
         let font_paths: Vec<PathBuf> = font_names
             .iter()
             .map(|name| fc.find(name, None).unwrap().path)
             .collect();
         font_paths
     }
-
     pub fn set_scale(&mut self, scale: i32) {
         self.scale = scale;
     }
-
     fn render_glyph(&self, conf: GlyphRasterConfig) -> (Metrics, Vec<u8>) {
         let mut glyph_cache = self.glyph_cache.borrow_mut();
         if let Some(bitmap) = glyph_cache.get(&conf) {
@@ -79,7 +69,6 @@ impl Font {
             glyph_cache.get(&conf).unwrap().clone()
         }
     }
-
     pub fn render(
         &mut self,
         text: &str,
@@ -93,7 +82,6 @@ impl Font {
         let mut current_width = 0.;
         let mut layout = self.layout.borrow_mut();
         layout.reset(&LayoutSettings::default());
-
         for c in text.chars() {
             let mut font_index = 0;
             for (i, font) in self.fonts.iter().enumerate() {
@@ -107,7 +95,6 @@ impl Font {
                 &TextStyle::new(&c.to_string(), self.size * self.scale as f32, font_index),
             );
         }
-
         for glyph in layout.glyphs() {
             if let Some(max_width) = max_width {
                 if current_width as usize + glyph.width > max_width {
@@ -120,7 +107,6 @@ impl Font {
                 if alpha != &0 {
                     let x = glyph.x + x_offset as f32 + (i % glyph.width) as f32;
                     let y = glyph.y + y_offset as f32 + (i / glyph.width) as f32;
-
                     match image.get_pixel_mut_checked(x as u32, y as u32) {
                         Some(pixel) => {
                             pixel.blend(&image::Rgba([color.0, color.1, color.2, *alpha]))
@@ -133,7 +119,6 @@ impl Font {
         if let Some(glyph) = layout.glyphs().last() {
             width = glyph.x as usize + glyph.width;
         }
-
         (width as u32, layout.height() as u32)
     }
 }
