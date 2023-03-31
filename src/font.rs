@@ -30,10 +30,7 @@ impl Font {
         } else {
             font_names
         };
-        let font_paths: Vec<PathBuf> = font_names
-            .iter()
-            .map(|name| fc.find(name, None).unwrap().path)
-            .collect();
+        let font_paths = fun_name(font_names, fc);
         let mut font_data = Vec::new();
 
         for font_path in font_paths {
@@ -131,4 +128,12 @@ impl Font {
 
         (width as u32, layout.height() as u32)
     }
+}
+
+fn fun_name(font_names: Vec<String>, fc: Fontconfig) -> Vec<PathBuf> {
+    let font_paths: Vec<PathBuf> = font_names
+        .iter()
+        .map(|name| fc.find(name, None).unwrap().path)
+        .collect();
+    font_paths
 }
