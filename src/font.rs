@@ -1,7 +1,7 @@
 use crate::color::Color;
 use fontdue::layout::{CoordinateSystem, GlyphRasterConfig, Layout, LayoutSettings, TextStyle};
 use fontdue::Metrics;
-use std::cell::RefCell;
+use std::cell::{RefCell, RefMut};
 use std::collections::HashMap;
 use std::path::PathBuf;
 
@@ -65,14 +65,18 @@ impl Font {
         if let Some(bitmap) = glyph_cache.get(&conf) {
             bitmap.clone()
         } else {
-            let font: Vec<&fontdue::Font> = self
-                .fonts
-                .iter()
-                .filter(|f| (*f).file_hash() == conf.font_hash)
-                .collect();
-            glyph_cache.insert(conf, font.first().unwrap().rasterize_config(conf));
-            glyph_cache.get(&conf).unwrap().clone()
+            self.bar(&conf, &mut glyph_cache)
         }
+    }
+
+    fn bar(&self, conf: &GlyphRasterConfig, glyph_cache: &mut RefMut<HashMap<GlyphRasterConfig, (Metrics, Vec<u8>)>>) -> (Metrics, Vec<u8>) {
+        let font: Vec<&fontdue::Font> = self
+            .fonts
+            .iter()
+            .filter(|f| (*f).file_hash() == conf.font_hash)
+            .collect();
+        glyph_cache.insert(conf, font.first().unwrap().rasterize_config(conf));
+        glyph_cache.get(&conf).unwrap().clone()
     }
 
     pub fn render(
