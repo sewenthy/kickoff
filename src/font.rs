@@ -104,11 +104,13 @@ impl Font {
         }
 
         for glyph in layout.glyphs() {
+            /* START SELECTION */
             if let Some(max_width) = max_width {
                 if current_width as usize + glyph.width > max_width {
                     break;
                 }
             }
+            /* END SELECTION */
             let (metrics, bitmap) = self.render_glyph(glyph.key);
             current_width += metrics.advance_width;
             for (i, alpha) in bitmap.iter().enumerate() {
