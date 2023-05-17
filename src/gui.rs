@@ -30,6 +30,7 @@ use std::io::{BufWriter, ErrorKind, Seek, Write};
 use std::rc::Rc;
 
 use image::{Pixel, Rgba, RgbaImage};
+use smithay_client_toolkit::reexports::client::protocol::wl_pointer::Event;
 
 use crate::keybinds::Keybindings;
 
@@ -212,6 +213,7 @@ pub fn register_inputs(
             if has_ptr {
                 let pointer = seat.get_pointer();
                 pointer.quick_assign(move |_, event: PEvent, mut data| {
+                    /* START SELECTION */
                     let DData {
                         query,
                         action,
@@ -226,6 +228,7 @@ pub fn register_inputs(
                             }
                         }
                     }
+                    /* START SELECTION */
                 });
             }
         }
