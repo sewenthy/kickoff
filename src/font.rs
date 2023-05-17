@@ -65,6 +65,7 @@ impl Font {
         if let Some(bitmap) = glyph_cache.get(&conf) {
             bitmap.clone()
         } else {
+            /* START SELECTION */
             let font: Vec<&fontdue::Font> = self
                 .fonts
                 .iter()
@@ -72,6 +73,7 @@ impl Font {
                 .collect();
             glyph_cache.insert(conf, font.first().unwrap().rasterize_config(conf));
             glyph_cache.get(&conf).unwrap().clone()
+            /* END SELECTION */
         }
     }
 
