@@ -48,6 +48,7 @@ impl History {
 
         if history_path.exists() {
             let last_modified = history_path.metadata()?.modified()?;
+            /* START SELECTION */
             let interval_diff = if decrease_interval > 0 {
                 SystemTime::now()
                     .duration_since(SystemTime::UNIX_EPOCH)
@@ -62,6 +63,7 @@ impl History {
             } else {
                 0
             };
+            /* END SELECTION */
 
             let mut rdr = csv::Reader::from_path(history_path).unwrap();
             for result in rdr.deserialize() {
