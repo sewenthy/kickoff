@@ -30,10 +30,12 @@ impl Font {
         } else {
             font_names
         };
+        /* START SELECTION */
         let font_paths: Vec<PathBuf> = font_names
             .iter()
             .map(|name| fc.find(name, None).unwrap().path)
             .collect();
+        /* END SELECTION */
         let mut font_data = Vec::new();
 
         for font_path in font_paths {
